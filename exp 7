@@ -1,0 +1,232 @@
+-- Create EMPLOYEE table
+CREATE TABLE EMPLOYEE (
+    Ssn CHAR(9) PRIMARY KEY,
+    Fname VARCHAR(50),
+    Lname VARCHAR(50),
+    Address VARCHAR(100),
+    Bdate DATE,
+    Sex CHAR,
+    Salary DECIMAL(10,2),
+    Super_ssn CHAR(9),
+    Dno INT,
+    FOREIGN KEY (Super_ssn) REFERENCES EMPLOYEE(Ssn),
+    FOREIGN KEY (Dno) REFERENCES DEPARTMENT(Dnumber)
+);
+
+-- Create DEPARTMENT table
+CREATE TABLE DEPARTMENT (
+    Dnumber INT PRIMARY KEY,
+    Dname VARCHAR(50),
+    Mgr_ssn CHAR(9),
+    Mgr_start_date DATE,
+    FOREIGN KEY (Mgr_ssn) REFERENCES EMPLOYEE(Ssn)
+);
+
+
+-- Insert data into EMPLOYEE table
+INSERT INTO EMPLOYEE (Ssn, Fname, Lname, Address, Bdate, Sex, Salary, Super_ssn, Dno) VALUES
+('123456789', 'Ramesh', 'Patel', '123 Main Street, Mumbai', '1980-05-15', 'M', 50000.00, NULL, 1),
+('234567890', 'Suresh', 'Kumar', '456 Park Avenue, Delhi', '1975-10-20', 'M', 60000.00, '123456789', 2),
+('345678901', 'Priya', 'Sharma', '789 Elm Street, Bangalore', '1982-08-12', 'F', 55000.00, '123456789', 1),
+('456789012', 'Neha', 'Singh', '101 Oak Street, Kolkata', '1988-04-25', 'F', 52000.00, '234567890', 3),
+('567890123', 'Amit', 'Verma', '321 Pine Street, Mumbai', '1979-07-30', 'M', 62000.00, '234567890', 2),
+('678901234', 'Pooja', 'Gupta', '654 Cedar Street, Delhi', '1985-01-10', 'F', 58000.00, '345678901', 1),
+('789012345', 'Rajesh', 'Yadav', '987 Maple Street, Chennai', '1990-03-18', 'M', 54000.00, '345678901', 3),
+('890123456', 'Anjali', 'Rao', '741 Birch Street, Hyderabad', '1983-12-05', 'F', 56000.00, '567890123', 2),
+('901234567', 'Manish', 'Iyer', '852 Walnut Street, Pune', '1986-09-22', 'M', 57000.00, '567890123', 1),
+('012345678', 'Sneha', 'Menon', '963 Cherry Street, Bangalore', '1992-11-08', 'F', 59000.00, '678901234', 3);
+
+-- Insert data into DEPARTMENT table
+INSERT INTO DEPARTMENT (Dnumber, Dname, Mgr_ssn, Mgr_start_date) VALUES
+(1, 'HR', '123456789', '2010-01-01'),
+(2, 'Finance', '234567890', '2011-03-15'),
+(3, 'IT', '345678901', '2012-05-20');
+
+Sure, here are the queries for each question:
+
+1. Display all employee names and salary whose salary is greater than the minimum salary of the company:
+
+```sql
+SELECT Fname, Lname, Salary 
+FROM EMPLOYEE 
+WHERE Salary > (SELECT MIN(Salary) FROM EMPLOYEE);
+```
+
+2. Display information about employees who earn more than any employee in department number 5:
+
+```sql
+SELECT * 
+FROM EMPLOYEE 
+WHERE Salary > (SELECT MAX(Salary) FROM EMPLOYEE WHERE Dno = 5);
+```
+
+3. Display the details of those who draw a salary greater than the average salary:
+
+```sql
+SELECT * 
+FROM EMPLOYEE 
+WHERE Salary > (SELECT AVG(Salary) FROM EMPLOYEE);
+```
+
+4. Retrieve the name and address of every employee who works for the Research Department:
+
+```sql
+SELECT E.Fname, E.Lname, E.Address 
+FROM EMPLOYEE E, DEPARTMENT D 
+WHERE E.Dno = D.Dnumber AND D.Dname = 'Research';
+```
+
+5. Retrieve the name of each employee who has a dependent with the same first name and is the same sex as the employee:
+
+```sql
+SELECT E.Fname, E.Lname 
+FROM EMPLOYEE E 
+WHERE E.Ssn IN (
+    SELECT Essn 
+    FROM DEPENDENT D 
+    WHERE E.Fname = D.Dependent_Name AND E.Sex = D.Sex
+);
+```
+
+6. Make a list of all project numbers for projects that involve an employee whose last name is 'Smith', either as a worker or as a manager of the department that controls the project:
+
+```sql
+SELECT Pno 
+FROM WORKS_ON W, EMPLOYEE E 
+WHERE W.Essn = E.Ssn AND E.Lname = 'Smith' 
+UNION 
+SELECT Pnumber 
+FROM PROJECT P, DEPARTMENT D, EMPLOYEE E 
+WHERE P.Dnum = D.Dnumber AND D.Mgr_ssn = E.Ssn AND E.Lname = 'Smith';
+```
+
+7. Display the name for all employees who work in a department with any employee whose first name contains the letter 'h':
+
+```sql
+SELECT Fname 
+FROM EMPLOYEE 
+WHERE Dno IN (
+    SELECT Dno 
+    FROM EMPLOYEE 
+    WHERE Fname LIKE '%h%'
+);
+```
+
+8. Retrieve all employees whose address starts with 'Houston':
+
+```sql
+SELECT Fname, Lname, Address 
+FROM EMPLOYEE 
+WHERE Address LIKE 'Houston%';
+```
+
+9. Retrieve all employees whose address ends with 'Houston':
+
+```sql
+SELECT Fname, Lname, Address 
+FROM EMPLOYEE 
+WHERE Address LIKE '%Houston';
+```
+
+10. Find all employees who were born during the 1960s:
+
+```sql
+SELECT Fname, Lname 
+FROM EMPLOYEE 
+WHERE Bdate BETWEEN '1960-01-01' AND '1969-12-31';
+```
+Sure, here are the queries for the remaining questions:
+
+11. Retrieve all employees in department 5 whose salary is between $30,000 and $40,000:
+
+```sql
+SELECT * 
+FROM EMPLOYEE 
+WHERE Salary BETWEEN 30000 AND 40000 AND Dno = 5;
+```
+
+12. Write a SQL query to find those employees who work in the same department where 'Ramesh' works, excluding records where the first name is 'Ramesh', returning the first name, last name:
+
+```sql
+SELECT Fname, Lname, Dno 
+FROM EMPLOYEE 
+WHERE Dno = (
+    SELECT Dno 
+    FROM EMPLOYEE 
+    WHERE Fname = 'Ramesh'
+) AND Fname <> 'Ramesh';
+```
+
+13. Display all department numbers available in the EMPLOYEE table but not in the DEPARTMENT table:
+
+```sql
+SELECT Dno 
+FROM EMPLOYEE 
+LEFT JOIN DEPARTMENT ON Dno = Dnumber 
+WHERE Dnumber IS NULL;
+```
+
+14. Display all department numbers available in the DEPARTMENT table but not in the EMPLOYEE table:
+
+```sql
+SELECT Dnumber 
+FROM DEPARTMENT 
+RIGHT JOIN EMPLOYEE ON Dno = Dnumber 
+WHERE Dno IS NULL;
+```
+
+15. For every project located in 'Stafford', list the project number, the controlling department number, and the department manager’s last name, address, and birth date:
+
+```sql
+SELECT Pnumber, Dnum, E.Lname AS Manager_Last_Name, E.Address AS Manager_Address, E.Bdate AS Manager_Birth_Date 
+FROM PROJECT P 
+JOIN DEPARTMENT D ON P.Dnum = D.Dnumber 
+JOIN EMPLOYEE E ON D.Mgr_ssn = E.Ssn 
+WHERE P.Plocation = 'Stafford';
+```
+
+16. For each employee, retrieve the employee’s first and last name and the first and last name of his or her immediate supervisor:
+
+```sql
+SELECT E.Fname AS Employee_First_Name, E.Lname AS Employee_Last_Name, S.Fname AS Supervisor_First_Name, S.Lname AS Supervisor_Last_Name 
+FROM EMPLOYEE E 
+JOIN EMPLOYEE S ON E.Super_ssn = S.Ssn;
+```
+
+17. For each employee, retrieve the employee’s first and last name and the first and last name of his or her immediate supervisor, including those who have no immediate supervisors:
+
+```sql
+SELECT E.Fname AS Employee_First_Name, E.Lname AS Employee_Last_Name, S.Fname AS Supervisor_First_Name, S.Lname AS Supervisor_Last_Name 
+FROM EMPLOYEE E 
+LEFT JOIN EMPLOYEE S ON E.Super_ssn = S.Ssn;
+```
+
+18. List the details of employees having no immediate supervisor:
+
+```sql
+SELECT * 
+FROM EMPLOYEE 
+WHERE Super_ssn IS NULL;
+```
+
+19. Show the resulting salaries if every employee working on the 'ProductX' project is given a 10 percent raise:
+SELECT E.Fname, E.Lname, 1.1 * E.Salary AS Increased_sal 
+FROM EMPLOYEE E 
+JOIN WORKS_ON W ON E.Ssn = W.Essn 
+JOIN PROJECT P ON W.Pno = P.Pnumber 
+WHERE P.Pname = 'ProductX';
+
+20. List the first name and last name of all employees who work in the same department as the manager with last name 'Wong':
+
+SELECT E.Fname, E.Lname 
+FROM EMPLOYEE E 
+WHERE E.Dno = (
+    SELECT D.Dnumber 
+    FROM DEPARTMENT D 
+    WHERE D.Mgr_ssn = (
+        SELECT E2.Ssn 
+        FROM EMPLOYEE E2 
+        WHERE E2.Lname = 'Wong'
+    )
+);
+
